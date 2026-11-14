@@ -1,6 +1,6 @@
 // Keeps the whole app on the phone so it opens, and reloads, with no network.
 // VERSION and FILES are filled in at build time by the offline plugin in vite.config.ts.
-const VERSION = '4e44dfe9a0'
+const VERSION = '8ce137bf1b'
 const FILES = ["./","./assets/index-BIqwNriO.js","./assets/index-e9C-akVM.css","./assets/plus-jakarta-sans-latin-ext-wght-normal-DmpS2jIq.woff2","./assets/plus-jakarta-sans-latin-wght-normal-eXO_dkmS.woff2"]
 const CACHE = `kwan-${VERSION}`
 const MATCH = { ignoreSearch: true, ignoreVary: true }
@@ -9,7 +9,9 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
       .open(CACHE)
-      .then((cache) => cache.addAll(FILES))
+      // The page itself is fetched past the browser's own cache. Otherwise an out-of-date page can be
+      // saved next to the new files, and it then asks for old files that no longer exist.
+      .then((cache) => cache.addAll(FILES.map((url) => (url === './' ? new Request(url, { cache: 'reload' }) : url))))
       .then(() => self.skipWaiting()),
   )
 })
