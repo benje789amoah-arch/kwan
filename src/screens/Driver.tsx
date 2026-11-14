@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { firstLeg, getRoute, routes } from '../data'
 import { useOnline, useStore } from '../store'
-import { Icon, Logo } from '../ui'
+import { Icon, Logo, type IconName } from '../ui'
 
 /**
  * Check-in for the driver or conductor. Built for a basic phone held in one hand at a busy stop:
@@ -38,10 +38,13 @@ const others: Rider[] = [
 ]
 
 const tones: Record<Result['tone'], string> = {
-  ok: 'bg-forest text-white',
-  warn: 'bg-sun text-ink',
-  bad: 'bg-alert text-white',
+  ok: 'bg-brand text-on-brand',
+  warn: 'bg-accent text-on-accent',
+  bad: 'bg-danger text-on-danger',
 }
+
+// Each answer has its own icon as well as its own colour.
+const toneIcons: Record<Result['tone'], IconName> = { ok: 'ok', warn: 'warn', bad: 'bad' }
 
 function loadRun(): Run {
   try {
@@ -172,17 +175,17 @@ export default function Driver() {
   }
 
   const header = (
-    <header className="bg-forest px-4 pt-4 pb-4 text-white">
+    <header className="bg-brand px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-4 text-on-brand">
       <div className="flex items-center justify-between">
-        <Logo light />
-        <Link to="/" className="rounded-full bg-white/10 px-4 py-2 text-sm font-semibold">
+        <Logo onBrand />
+        <Link to="/" className="rounded-full bg-on-brand/10 px-4 py-2 text-sm font-semibold">
           Rider app
         </Link>
       </div>
-      <p className="mt-3 text-sm font-bold uppercase tracking-wider text-sun">
+      <p className="mt-3 text-sm font-bold uppercase tracking-wider text-accent">
         Driver check-in · {leg.label} run
       </p>
-      <p className="text-white/85">
+      <p className="text-on-brand/85">
         {leg.stops[0].name} to {leg.stops[leg.stops.length - 1].name}
       </p>
     </header>
@@ -199,23 +202,23 @@ export default function Driver() {
             {onBoard} of {riders.length} riders boarded.
           </p>
           {missed.length > 0 && (
-            <section className="mt-4 rounded-3xl border border-line bg-card p-4">
+            <section className="mt-4 rounded-2xl border border-line bg-surface p-4">
               <h2 className="font-bold">Did not board</h2>
               <ul className="mt-2 space-y-1">
                 {missed.map((r) => (
                   <li key={r.code} className="flex justify-between gap-3">
                     <span className="font-semibold">{r.name}</span>
-                    <span className="text-muted">{leg.stops[r.boardIdx].name}</span>
+                    <span className="text-fg-muted">{leg.stops[r.boardIdx].name}</span>
                   </li>
                 ))}
               </ul>
-              <p className="mt-3 text-sm text-muted">Each of them has been told the bus left, with their options.</p>
+              <p className="mt-3 text-sm text-fg-muted">Each of them has been told the bus left, with their options.</p>
             </section>
           )}
           <button
             type="button"
             onClick={restart}
-            className="mt-6 min-h-16 w-full rounded-2xl bg-forest text-lg font-bold text-white"
+            className="mt-6 min-h-16 w-full rounded-2xl bg-brand text-lg font-bold text-on-brand"
           >
             Start a new run
           </button>
@@ -228,8 +231,8 @@ export default function Driver() {
     <div className="flex min-h-dvh flex-col">
       {header}
 
-      <section className="border-b border-line bg-card px-4 py-3">
-        <p className="text-sm font-bold text-muted">
+      <section className="border-b border-line bg-surface px-4 py-3">
+        <p className="text-sm font-bold text-fg-muted">
           Stop {run.at + 1} of {leg.stops.length} · leaves {stop.time}
         </p>
         <h1 className="text-3xl leading-tight font-extrabold">{stop.name}</h1>
@@ -239,22 +242,25 @@ export default function Driver() {
       </section>
 
       {!online && (
-        <p role="status" className="flex items-center gap-2 bg-sun px-4 py-3 text-sm font-bold text-ink">
-          <Icon name="offline" size={18} /> No network. Check-ins are saved on this phone and sent later.
+        <p role="status" className="flex items-center gap-2 bg-accent px-4 py-3 text-sm font-bold text-on-accent">
+          <Icon name="offline" /> No network. Check-ins are saved on this phone and sent later.
         </p>
       )}
 
-      <main className="flex-1 px-4 pt-4 pb-6">
-        <p className="text-sm font-bold text-muted">Type the 4 digits on the rider’s pass</p>
+      <main className="flex-1 px-4 pt-4 pb-8">
+        <p className="text-sm font-bold text-fg-muted">Type the 4 digits on the rider’s pass</p>
         <p className="mt-1 text-center text-5xl font-extrabold tracking-wider" aria-label={`Code KW ${digits}`}>
           KW-{digits.padEnd(4, '·')}
         </p>
 
         <div role="status" aria-live="assertive" className="mt-3 min-h-20">
           {result && (
-            <div className={`rounded-2xl px-4 py-3 ${tones[result.tone]}`}>
-              <p className="text-xl leading-tight font-extrabold">{result.title}</p>
-              <p className="mt-0.5">{result.detail}</p>
+            <div className={`flex animate-pop items-start gap-3 rounded-2xl px-4 py-3 ${tones[result.tone]}`}>
+              <Icon name={toneIcons[result.tone]} size="xl" className="mt-0.5" />
+              <div>
+                <p className="text-xl leading-tight font-extrabold">{result.title}</p>
+                <p className="mt-0.5">{result.detail}</p>
+              </div>
             </div>
           )}
         </div>
@@ -269,15 +275,15 @@ export default function Driver() {
           <button type="button" onClick={() => press('0')} className={`${key} text-3xl`}>
             0
           </button>
-          <button type="button" onClick={erase} aria-label="Delete" className={`${key} text-lg`}>
-            Delete
+          <button type="button" onClick={erase} aria-label="Delete" className={`${key} grid place-items-center`}>
+            <Icon name="erase" size="lg" />
           </button>
         </div>
 
         <section className="mt-6">
           <h2 className="font-bold">Booked at this stop</h2>
           {here.length === 0 ? (
-            <p className="mt-1 text-muted">No one is booked here. You can leave on time.</p>
+            <p className="mt-1 text-fg-muted">No one is booked here. You can leave on time.</p>
           ) : (
             <ul className="mt-2 space-y-2">
               {here.map((r) => {
@@ -286,26 +292,26 @@ export default function Driver() {
                   <li
                     key={r.code}
                     className={`flex min-h-16 items-center gap-3 rounded-2xl border-2 px-4 py-2 ${
-                      boarded ? 'border-forest bg-leaf' : 'border-line bg-card'
+                      boarded ? 'border-brand-fg bg-brand-tint' : 'border-line bg-surface'
                     }`}
                   >
                     <span className="flex-1">
                       <span className="block text-lg font-extrabold">{r.name}</span>
-                      <span className="block text-sm text-muted">
+                      <span className="block text-sm text-fg-muted">
                         {r.code}
                         {r.catchingUpFrom ? ` · catching up from ${r.catchingUpFrom}` : ''}
                       </span>
                     </span>
                     {boarded ? (
-                      <span className="flex items-center gap-1 font-bold text-forest">
-                        <Icon name="check" size={20} /> On board
+                      <span className="flex items-center gap-1 font-bold text-brand-fg">
+                        <Icon name="ok" /> On board
                       </span>
                     ) : (
                       <button
                         type="button"
                         aria-label={`Board ${r.name}`}
                         onClick={() => check(r.code)}
-                        className="min-h-12 rounded-xl border-2 border-forest px-4 font-bold text-forest"
+                        className="min-h-12 rounded-xl border-2 border-brand-fg px-4 font-bold text-brand-fg"
                       >
                         Board
                       </button>
@@ -317,27 +323,27 @@ export default function Driver() {
           )}
         </section>
 
-        <button type="button" onClick={restart} className="mt-6 min-h-11 text-sm text-muted underline">
+        <button type="button" onClick={restart} className="mt-6 min-h-11 text-sm text-fg-muted underline">
           Prototype: restart this run
         </button>
       </main>
 
-      <footer className="sticky bottom-0 border-t border-line bg-paper px-4 py-3">
+      <footer className="sticky bottom-0 border-t border-line bg-canvas px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         {confirming ? (
           <div>
             <p className="font-bold">
               {waiting.length} not here: {waiting.map((r) => r.name).join(', ')}
             </p>
-            <p className="text-sm text-muted">They will be told the bus has left, with their options.</p>
+            <p className="text-sm text-fg-muted">They will be told the bus has left, with their options.</p>
             <div className="mt-3 grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => setConfirming(false)}
-                className="min-h-16 rounded-2xl border-2 border-line bg-card text-lg font-bold"
+                className="min-h-16 rounded-2xl border border-outline bg-surface text-lg font-bold"
               >
                 Wait
               </button>
-              <button type="button" onClick={leave} className="min-h-16 rounded-2xl bg-alert text-lg font-bold text-white">
+              <button type="button" onClick={leave} className="min-h-16 rounded-2xl bg-danger text-lg font-bold text-on-danger">
                 Leave now
               </button>
             </div>
@@ -346,7 +352,7 @@ export default function Driver() {
           <button
             type="button"
             onClick={() => (waiting.length > 0 ? setConfirming(true) : leave())}
-            className="min-h-16 w-full rounded-2xl bg-forest text-lg font-bold text-white"
+            className="min-h-16 w-full rounded-2xl bg-brand text-lg font-bold text-on-brand"
           >
             {run.at >= lastBoardingIdx ? 'Finish run' : `Leave ${stop.name}`}
             {waiting.length > 0 ? ` · ${waiting.length} not here` : ''}
@@ -358,4 +364,4 @@ export default function Driver() {
 }
 
 const key =
-  'min-h-16 rounded-2xl border-2 border-line bg-card font-extrabold text-ink active:bg-leaf active:border-forest'
+  'min-h-16 rounded-2xl border border-outline bg-surface font-extrabold text-fg active:bg-brand-tint active:border-brand-fg'

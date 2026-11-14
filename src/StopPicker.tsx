@@ -1,5 +1,5 @@
 import type { BusRoute, TripId, TripLine } from './data'
-import { Icon, choice } from './ui'
+import { Icon, choice, eyebrow, radio } from './ui'
 
 /** Home and work stop pickers. The work stop is always kept after the home stop along the route. */
 export function StopPicker({
@@ -32,15 +32,9 @@ export function StopPicker({
         <div className="space-y-2">
           {homeStops.map((s) => (
             <label key={s.id} className={choice}>
-              <input
-                type="radio"
-                name="home"
-                className="size-5 accent-forest"
-                checked={homeId === s.id}
-                onChange={() => pickHome(s.id)}
-              />
+              <input type="radio" name="home" className={radio} checked={homeId === s.id} onChange={() => pickHome(s.id)} />
               <span className="flex-1 font-semibold">{s.name}</span>
-              <span className="text-sm text-muted">{time(s)}</span>
+              <span className="text-sm text-fg-muted">{time(s)}</span>
             </label>
           ))}
         </div>
@@ -54,12 +48,12 @@ export function StopPicker({
               <input
                 type="radio"
                 name="work"
-                className="size-5 accent-forest"
+                className={radio}
                 checked={workId === s.id}
                 onChange={() => onChange(homeId, s.id)}
               />
               <span className="flex-1 font-semibold">{s.name}</span>
-              <span className="text-sm text-muted">{time(s)}</span>
+              <span className="text-sm text-fg-muted">{time(s)}</span>
             </label>
           ))}
         </div>
@@ -71,18 +65,18 @@ export function StopPicker({
 /** Says in plain words where to stand and by when, for each trip. */
 export function DayCard({ lines, title = 'Your day' }: { lines: TripLine[]; title?: string }) {
   return (
-    <section aria-live="polite" className="mt-6 rounded-3xl bg-forest p-4 text-white">
-      <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-sun">
-        <Icon name="clock" size={18} /> {title}
+    <section aria-live="polite" className="mt-6 rounded-2xl bg-brand p-4 text-on-brand">
+      <h2 className={`${eyebrow} flex items-center gap-2 text-accent`}>
+        <Icon name="clock" size="sm" /> {title}
       </h2>
       <ul className="mt-2 space-y-3">
         {lines.map((l) => (
           <li key={l.label}>
-            <p className="text-sm text-white/75">{l.label}</p>
+            <p className="text-sm text-on-brand/75">{l.label}</p>
             <p className="text-lg leading-snug font-bold">
               Be at {l.board} by {l.boardAt}
             </p>
-            <p className="text-white/85">
+            <p className="text-on-brand/85">
               Arrive {l.arrive} around {l.arriveAt}
             </p>
           </li>

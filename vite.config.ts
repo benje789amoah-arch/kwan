@@ -31,7 +31,9 @@ function offline(): Plugin {
       // The worker's own code counts towards the version, so a fix to it reaches phones too.
       const hash = createHash('sha256').update(template)
       for (const f of files) hash.update(f).update(readFileSync(join(outDir, f)))
-      const urls = ['./', ...files.filter((f) => f !== 'index.html').map((f) => `./${f}`)]
+      // Fonts for scripts the app does not use are left to load on demand instead of being saved up front.
+      const unused = /-(vietnamese|cyrillic|cyrillic-ext|greek|greek-ext)-/
+      const urls = ['./', ...files.filter((f) => f !== 'index.html' && !unused.test(f)).map((f) => `./${f}`)]
       const sw = template
         .replace('__VERSION__', hash.digest('hex').slice(0, 10))
         .replace("/* __FILES__ */ ['./']", JSON.stringify(urls))

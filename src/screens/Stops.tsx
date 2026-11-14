@@ -3,7 +3,7 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { getRoute, tripLines, trips, type TripId } from '../data'
 import { useStore } from '../store'
 import { DayCard, StopPicker } from '../StopPicker'
-import { Icon, Screen, btnPrimary, choice } from '../ui'
+import { Button, Icon, Screen, choice } from '../ui'
 
 export default function Stops() {
   const { id } = useParams()
@@ -28,25 +28,20 @@ export default function Stops() {
   return (
     <Screen
       title={`${route.from} to ${route.to}`}
-      step={2}
+      step={1}
+      back="/routes"
       footer={
-        <button className={btnPrimary} onClick={next}>
+        <Button onClick={next}>
           Choose a plan <Icon name="next" />
-        </button>
+        </Button>
       }
     >
       <fieldset className="mt-2">
         <legend className="mb-2 font-bold">Which trips do you want?</legend>
         <div className="grid grid-cols-3 gap-2">
           {trips.map((t) => (
-            <label key={t.id} className={`${choice} justify-center px-2 text-center font-bold`}>
-              <input
-                type="radio"
-                name="trip"
-                className="sr-only"
-                checked={trip === t.id}
-                onChange={() => setTrip(t.id)}
-              />
+            <label key={t.id} className={`${choice} justify-center px-2! text-center font-bold whitespace-nowrap`}>
+              <input type="radio" name="trip" className="sr-only" checked={trip === t.id} onChange={() => setTrip(t.id)} />
               {t.name}
             </label>
           ))}

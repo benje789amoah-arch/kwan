@@ -3,7 +3,7 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { getRoute, niceDate, tripLines } from '../data'
 import { useStore } from '../store'
 import { StopPicker } from '../StopPicker'
-import { Row, Screen, btnPrimary } from '../ui'
+import { Button, Row, Screen, card } from '../ui'
 
 export default function ChangeStop() {
   const { state, update } = useStore()
@@ -20,7 +20,8 @@ export default function ChangeStop() {
   const after = tripLines(route, homeId, workId, pass.trip)
 
   function confirm() {
-    update({ pass: { ...pass!, homeId, workId } })
+    // The change starts from the next ride, so home goes back to showing that ride.
+    update({ pass: { ...pass!, homeId, workId }, scenario: 'before', outcome: null })
     nav('/home', { replace: true, state: { notice: `Stop changed. Be at ${after[0].board} by ${after[0].boardAt}.` } })
   }
 
@@ -28,12 +29,12 @@ export default function ChangeStop() {
     <Screen
       title="Change your stop"
       footer={
-        <button className={btnPrimary} disabled={!changed} onClick={confirm}>
-          {changed ? 'Confirm change' : 'Pick a different stop'}
-        </button>
+        <Button disabled={!changed} onClick={confirm}>
+          {changed ? 'Confirm change' : 'Pick a different stop first'}
+        </Button>
       }
     >
-      <p className="mt-2 text-muted">
+      <p className="mt-2 text-fg-muted">
         Same route, same price. No need to call anyone. A different route needs a new pass.
       </p>
 
@@ -48,15 +49,15 @@ export default function ChangeStop() {
         }}
       />
 
-      <section aria-live="polite" className="mt-6 rounded-3xl border border-line bg-card p-4">
+      <section aria-live="polite" className={`${card} mt-6 p-4`}>
         <h2 className="font-bold">What changes</h2>
         {changed ? (
           <ul className="mt-2 space-y-3">
             {after.map((line, i) => (
               <li key={line.label}>
-                <p className="text-sm text-muted">{line.label}</p>
+                <p className="text-sm text-fg-muted">{line.label}</p>
                 {before[i].board !== line.board && (
-                  <p className="text-sm text-muted">
+                  <p className="text-sm text-fg-muted">
                     <span className="sr-only">Was: </span>
                     <s>
                       Be at {before[i].board} by {before[i].boardAt}
@@ -67,7 +68,7 @@ export default function ChangeStop() {
                   Be at {line.board} by {line.boardAt}
                 </p>
                 {before[i].arrive !== line.arrive && (
-                  <p className="text-sm text-muted">
+                  <p className="text-sm text-fg-muted">
                     <span className="sr-only">Was: </span>
                     <s>
                       Arrive {before[i].arrive} around {before[i].arriveAt}
@@ -81,7 +82,7 @@ export default function ChangeStop() {
             ))}
           </ul>
         ) : (
-          <p className="mt-1 text-sm text-muted">Nothing yet. Pick a new stop above to see your new times.</p>
+          <p className="mt-1 text-sm text-fg-muted">Nothing yet. Pick a new stop above to see your new times.</p>
         )}
         <div className="mt-3 border-t border-line pt-2">
           <Row label="Price" value="No change" />

@@ -16,7 +16,9 @@ there is no backend, and no money moves.
 - **Missing a bus:** catch it at the next stop, or use a ride save.
 - **Driver check-in:** a keypad and rider list for a basic phone held in one hand.
 
-"Prototype controls" at the bottom of the home screen picks the moment to look at, since there is no live bus.
+"Prototype controls" in the Account tab picks the moment to look at, since there is no live bus.
+
+It follows the phone's light or dark setting. The boarding pass stays black on white in both so the QR code always scans.
 
 ## Run it
 

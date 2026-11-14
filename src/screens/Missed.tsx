@@ -1,7 +1,7 @@
 import { Navigate, useNavigate } from 'react-router-dom'
 import { firstLeg, fromMinutes, getRoute, nextWorkingDay, niceDate, toMinutes, tripLines } from '../data'
 import { useStore, type Outcome, type Pass } from '../store'
-import { Screen, btnPrimary, btnQuiet } from '../ui'
+import { Button, Icon, Note, Screen, card } from '../ui'
 
 export default function Missed() {
   const { state, update } = useStore()
@@ -31,74 +31,87 @@ export default function Missed() {
 
   return (
     <Screen title="Missed your bus?">
-      <p className="mt-2 rounded-2xl bg-sun-soft px-4 py-3">
-        It is {now}. Your {board.time} bus left {board.name}
-        {scenario === 'gone' ? ` and reached ${alight.name} at ${alight.time}` : ''}.
-      </p>
+      <div className="mt-2">
+        <Note tone="warn" icon="clock">
+          It is {now}. Your {board.time} bus left {board.name}
+          {scenario === 'gone' ? ` and reached ${alight.name} at ${alight.time}` : ''}.
+        </Note>
+      </div>
 
       {next ? (
-        <section className="mt-4 rounded-3xl border border-line bg-card p-4">
-          <h2 className="text-lg font-extrabold">Catch it at the next stop</h2>
-          <p className="mt-1 text-2xl font-extrabold text-forest">
+        <section className={`${card} mt-4 p-4`}>
+          <h2 className="flex items-center gap-2 text-lg font-extrabold">
+            <Icon name="pin" className="text-brand-fg" /> Catch it at the next stop
+          </h2>
+          <p className="mt-1 text-2xl font-extrabold text-brand-fg">
             {next.name} · {next.time}
           </p>
-          <p className="mt-1 text-sm text-muted">
+          <p className="mt-1 text-sm text-fg-muted">
             Your seat is held until then. The bus cannot wait, and getting there is up to you.
           </p>
-          <button className={`${btnPrimary} mt-4`} onClick={() => finish({ kind: 'catch', stopId: next.id })}>
+          <Button className="mt-4" onClick={() => finish({ kind: 'catch', stopId: next.id })}>
             I’ll catch it there
-          </button>
+          </Button>
         </section>
-      ) : canSave && (
-        <p className="mt-4 text-sm text-muted">
-          {scenario === 'gone'
-            ? 'The bus has finished its run, so there is no stop left to catch it at.'
-            : `The next stop is ${alight.name}, where you get off, so there is no stop left to catch it at.`}
-        </p>
+      ) : (
+        canSave && (
+          <p className="mt-4 text-sm text-fg-muted">
+            {scenario === 'gone'
+              ? 'The bus has finished its run, so there is no stop left to catch it at.'
+              : `The next stop is ${alight.name}, where you get off, so there is no stop left to catch it at.`}
+          </p>
+        )
       )}
 
       {canSave ? (
-        <section className="mt-4 rounded-3xl border border-line bg-card p-4">
-          <h2 className="text-lg font-extrabold">Save this ride for later</h2>
+        <section className={`${card} mt-4 p-4`}>
+          <h2 className="flex items-center gap-2 text-lg font-extrabold">
+            <Icon name="calendar" className="text-brand-fg" /> Save this ride for later
+          </h2>
           <p className="mt-1">
             The ride goes back on your pass, and your pass runs one extra day, to{' '}
             <strong>{niceDate(newEnd.toISOString())}</strong>.
           </p>
-          <p className="mt-1 text-sm text-muted">
+          <p className="mt-1 text-sm text-fg-muted">
             You have {pass.savesLeft} ride {pass.savesLeft === 1 ? 'save' : 'saves'} left on this pass.
           </p>
-          <button
-            className={`${next ? btnQuiet : btnPrimary} mt-4`}
+          <Button
+            variant={next ? 'quiet' : 'primary'}
+            className="mt-4"
             onClick={() => finish({ kind: 'saved' }, { savesLeft: pass.savesLeft - 1, endsOn: newEnd.toISOString() })}
           >
             Save this ride
-          </button>
+          </Button>
         </section>
-      ) : next && (
-        <p className="mt-4 text-sm text-muted">This pass has no ride saves left.</p>
+      ) : (
+        next && <p className="mt-4 text-sm text-fg-muted">This pass has no ride saves left.</p>
       )}
 
       {!next && !canSave && (
-        <section className="mt-4 rounded-3xl border-2 border-alert bg-card p-4">
-          <h2 className="text-lg font-extrabold text-alert">This ride is used</h2>
+        <section className="mt-4 rounded-2xl border-2 border-danger-fg bg-surface p-4">
+          <h2 className="flex items-center gap-2 text-lg font-extrabold text-danger-fg">
+            <Icon name="bad" /> This ride is used
+          </h2>
           <p className="mt-1">
             There is no stop left to catch the bus at, and this pass has no ride saves left, so this {ride} ride cannot
             be moved.
           </p>
-          <button className={`${btnPrimary} mt-4`} onClick={() => finish({ kind: 'used' }, { ridesLeft: pass.ridesLeft - 1 })}>
+          <Button className="mt-4" onClick={() => finish({ kind: 'used' }, { ridesLeft: pass.ridesLeft - 1 })}>
             OK, I understand
-          </button>
+          </Button>
         </section>
       )}
 
       {(next || canSave) && (
-        <p className="mt-4 text-sm text-muted">If you choose nothing, this ride counts as used at the end of today.</p>
+        <p className="mt-4 text-sm text-fg-muted">If you choose nothing, this ride counts as used at the end of today.</p>
       )}
 
       {evening && (
-        <p className="mt-4 rounded-2xl bg-leaf px-4 py-3 text-sm">
-          Your evening seat is not affected: {evening.board}, {evening.boardAt}.
-        </p>
+        <div className="mt-4">
+          <Note icon="ok">
+            Your evening seat is not affected: {evening.board}, {evening.boardAt}.
+          </Note>
+        </div>
       )}
     </Screen>
   )
