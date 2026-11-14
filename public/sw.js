@@ -9,7 +9,9 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
       .open(CACHE)
-      .then((cache) => cache.addAll(FILES))
+      // The page itself is fetched past the browser's own cache. Otherwise an out-of-date page can be
+      // saved next to the new files, and it then asks for old files that no longer exist.
+      .then((cache) => cache.addAll(FILES.map((url) => (url === './' ? new Request(url, { cache: 'reload' }) : url))))
       .then(() => self.skipWaiting()),
   )
 })
