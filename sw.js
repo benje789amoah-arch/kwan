@@ -1,7 +1,7 @@
 // Keeps the whole app on the phone so it opens, and reloads, with no network.
 // VERSION and FILES are filled in at build time by the offline plugin in vite.config.ts.
-const VERSION = '32fdcb1294'
-const FILES = ["./","./assets/figtree-latin-ext-wght-normal-DCwSJGxG.woff2","./assets/figtree-latin-wght-normal-D_ZTVpCC.woff2","./assets/index-CHw-N6VB.css","./assets/index-DJot3_uE.js"]
+const VERSION = '4e44dfe9a0'
+const FILES = ["./","./assets/index-BIqwNriO.js","./assets/index-e9C-akVM.css","./assets/plus-jakarta-sans-latin-ext-wght-normal-DmpS2jIq.woff2","./assets/plus-jakarta-sans-latin-wght-normal-eXO_dkmS.woff2"]
 const CACHE = `kwan-${VERSION}`
 const MATCH = { ignoreSearch: true, ignoreVary: true }
 
